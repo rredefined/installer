@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting | RenderByte Shield</title>
+
+  <!-- Fallback redirect -->
+  <meta http-equiv="refresh" content="0; url=https://www.renderbyte.site" />
+
+  <script>
+    window.location.replace("https://www.renderbyte.site");
+  </script>
+
+  <style>
+    :root {
+      --bg-deep: #0f0a18;
+      --panel-bg: #1e152d;
+      --accent: #c084fc;
+      --accent-glow: rgba(192,132,252,.6);
+      --text-main: #ffffff;
+      --text-dim: #9486aa;
+      --border-glow: rgba(192,132,252,.2);
+      --sync-speed: 4s;
+    }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text-main);
+      font-family: 'Inter','Segoe UI',system-ui,sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .cyber-bg {
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(15,10,24,.85), rgba(15,10,24,.85)),
+        repeating-linear-gradient(0deg, transparent 0, transparent 1px, rgba(192,132,252,.03) 1px, rgba(192,132,252,.03) 2px),
+        repeating-linear-gradient(90deg, transparent 0, transparent 1px, rgba(192,132,252,.03) 1px, rgba(192,132,252,.03) 2px);
+      background-size: 100% 4px, 40px 40px, 40px 40px;
+      z-index: -1;
+    }
+
+    .vault-card {
+      background: var(--panel-bg);
+      padding: 50px 40px;
+      max-width: 520px;
+      width: 95%;
+      border: 1px solid var(--border-glow);
+      box-shadow: 0 0 50px rgba(0,0,0,.8);
+      clip-path: polygon(5% 0,95% 0,100% 10%,100% 90%,95% 100%,5% 100%,0 90%,0 10%);
+      animation: emerge 1s cubic-bezier(.2,.8,.2,1);
+      position: relative;
+    }
+
+    @keyframes emerge {
+      from { opacity: 0; transform: scale(.9) translateY(30px); filter: blur(10px); }
+      to { opacity: 1; transform: none; filter: none; }
+    }
+
+    .brand {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      animation: pulse var(--sync-speed) infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%,100% { text-shadow: 0 0 5px rgba(255,255,255,.2); }
+      50% { color: var(--accent); text-shadow: 0 0 25px var(--accent-glow); }
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 25px;
+    }
+
+    .message {
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .vault-card::before,
+    .vault-card::after {
+      content: "";
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 2px solid var(--accent);
+      opacity: .6;
+    }
+
+    .vault-card::before {
+      top: 15px; left: 15px;
+      border-right: 0; border-bottom: 0;
+    }
+
+    .vault-card::after {
+      bottom: 15px; right: 15px;
+      border-left: 0; border-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="cyber-bg"></div>
+
+<div class="vault-card">
+  <div class="brand">RenderByte Shield</div>
+  <div class="subtitle">Secure Redirect</div>
+
+  <p class="message">
+    You are being redirected to the official RenderByte website.<br><br>
+    If this does not happen automatically,
+    <a href="https://www.renderbyte.site">click here</a>.
+  </p>
+</div>
+
+</body>
+</html>
