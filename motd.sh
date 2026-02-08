@@ -1,14 +1,33 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Setting up RenderByte SSH MOTD..."
+echo "🚀 Applying final RenderByte SSH MOTD fix..."
 
-# Disable ALL default Ubuntu MOTD scripts
+### 1. Remove Ubuntu login banner (Welcome to Ubuntu)
+echo "" > /etc/issue
+echo "" > /etc/issue.net
+
+sed -i 's/^#\?Banner.*/Banner none/' /etc/ssh/sshd_config || true
+
+### 2. Disable pam_motd (this is the BIG one)
+sed -i 's/^session\s\+optional\s\+pam_motd.so/#&/' /etc/pam.d/sshd
+sed -i 's/^session\s\+optional\s\+pam_motd.so/#&/' /etc/pam.d/login
+
+### 3. Kill Ubuntu dynamic MOTD files
+rm -f /etc/motd
+rm -f /run/motd*
+rm -f /var/lib/update-notifier/motd*
+
+### 4. Disable motd-news (updates / esm spam)
+systemctl disable motd-news.service motd-news.timer >/dev/null 2>&1 || true
+systemctl stop motd-news.service motd-news.timer >/dev/null 2>&1 || true
+
+### 5. Disable ALL default update-motd scripts
 if [ -d /etc/update-motd.d ]; then
   chmod -x /etc/update-motd.d/* || true
 fi
 
-# Create RenderByte MOTD
+### 6. Install RenderByte MOTD (ONLY one enabled)
 cat > /etc/update-motd.d/00-renderbyte << 'EOF'
 #!/bin/bash
 
@@ -24,7 +43,7 @@ cat << "BANNER"
 BANNER
 echo -e "\e[0m"
 
-echo " OS        : $(lsb_release -ds 2>/dev/null || grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '\"')"
+echo " OS        : $(grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '\"')"
 echo " Processor : $(grep -m1 'model name' /proc/cpuinfo | cut -d ':' -f2 | xargs)"
 echo " Cores     : $(nproc)"
 echo " RAM       : $(free -h | awk '/Mem:/ {print $3 \" / \" $2}')"
@@ -42,10 +61,9 @@ EOF
 
 chmod +x /etc/update-motd.d/00-renderbyte
 
-# Disable Ubuntu MOTD via PAM (extra safety)
-sed -i 's/^session\s\+optional\s\+pam_motd.so/#&/' /etc/pam.d/sshd
-echo "session optional pam_motd.so motd=/run/motd.dynamic" >> /etc/pam.d/sshd
+### 7. Restart SSH
+systemctl restart ssh
 
-echo "✅ Ubuntu MOTD removed"
-echo "✅ RenderByte MOTD installed"
-echo "🔁 Logout & SSH again to see the clean login screen"
+echo "✅ DONE: Ubuntu banners removed"
+echo "✅ DONE: Only RenderByte MOTD will show"
+echo "🔁 IMPORTANT: Logout completely and SSH again"
