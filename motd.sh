@@ -1,49 +1,33 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Installing RenderByte universal login banner..."
+echo "🚀 Installing RenderByte UNIVERSAL login banner..."
 
-#######################################
-# 1. Disable Ubuntu/Debian MOTD safely #
-#######################################
-if [ -d /etc/update-motd.d ]; then
-  chmod -x /etc/update-motd.d/* 2>/dev/null || true
-fi
-
-systemctl disable motd-news.service motd-news.timer 2>/dev/null || true
-systemctl stop motd-news.service motd-news.timer 2>/dev/null || true
-
-rm -f /etc/motd /run/motd* /var/lib/update-notifier/motd* 2>/dev/null || true
+BANNER_FILE="/etc/renderbyte-banner.sh"
 
 ###################################
-# 2. Remove distro login banners  #
+# 1. Create banner script
 ###################################
-echo "" > /etc/issue 2>/dev/null || true
-echo "" > /etc/issue.net 2>/dev/null || true
-
-###################################
-# 3. Create UNIVERSAL login banner#
-###################################
-cat > /etc/profile.d/renderbyte.sh << 'EOF'
+cat > $BANNER_FILE << 'EOF'
 #!/bin/bash
 
-# Prevent duplicate output (sudo, su, tmux, etc.)
+# Avoid duplicate prints
 [ -n "$RENDERBYTE_SHOWN" ] && return
 export RENDERBYTE_SHOWN=1
 
 clear
 echo -e "\e[36m"
-cat << "BANNER"
+cat << "RBANNER"
 ██████╗ ███████╗███╗   ██╗██████╗ ███████╗██████╗ ██████╗ ██╗   ██╗████████╗███████╗
 ██╔══██╗██╔════╝████╗  ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝
 ██████╔╝█████╗  ██╔██╗ ██║██║  ██║█████╗  ██████╔╝██████╔╝ ╚████╔╝    ██║   █████╗  
 ██╔══██╗██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗██╔══██╗  ╚██╔╝     ██║   ██╔══╝  
 ██║  ██║███████╗██║ ╚████║██████╔╝███████╗██║  ██║██████╔╝   ██║      ██║   ███████╗
 ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝      ╚═╝   ╚══════╝
-BANNER
+RBANNER
 echo -e "\e[0m"
 
-OS_NAME=$(grep PRETTY_NAME /etc/os-release 2>/dev/null | cut -d= -f2 | tr -d '"')
+OS=$(grep PRETTY_NAME /etc/os-release 2>/dev/null | cut -d= -f2 | tr -d '"')
 CPU=$(grep -m1 'model name' /proc/cpuinfo 2>/dev/null | cut -d ':' -f2 | xargs)
 CORES=$(nproc 2>/dev/null)
 RAM=$(free -h 2>/dev/null | awk '/Mem:/ {print $3 " / " $2}')
@@ -52,7 +36,7 @@ IP=$(hostname -I 2>/dev/null | awk '{print $1}')
 HOST=$(hostname)
 UP=$(uptime -p 2>/dev/null)
 
-echo " OS        : ${OS_NAME:-Unknown}"
+echo " OS        : ${OS:-Unknown}"
 echo " Processor : ${CPU:-Unknown}"
 echo " Cores     : ${CORES:-N/A}"
 echo " RAM       : ${RAM:-N/A}"
@@ -68,10 +52,22 @@ echo " Support  : Open a ticket via Discord"
 echo
 EOF
 
-chmod +x /etc/profile.d/renderbyte.sh
+chmod +x $BANNER_FILE
 
 ###################################
-# 4. Done                          #
+# 2. Hook into ALL shells
 ###################################
-echo "✅ RenderByte universal banner installed"
-echo "🔁 Logout completely and SSH again"
+
+# /etc/profile (login shells)
+grep -q renderbyte-banner.sh /etc/profile || \
+echo "[ -f $BANNER_FILE ] && . $BANNER_FILE" >> /etc/profile
+
+# /etc/bash.bashrc (interactive shells)
+grep -q renderbyte-banner.sh /etc/bash.bashrc || \
+echo "[ -f $BANNER_FILE ] && . $BANNER_FILE" >> /etc/bash.bashrc
+
+###################################
+# 3. Done
+###################################
+echo "✅ RenderByte banner installed universally"
+echo "🔁 FULL logout (exit SSH) and reconnect"
