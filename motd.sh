@@ -69,5 +69,5 @@ echo "[ -f $BANNER_FILE ] && . $BANNER_FILE" >> /etc/bash.bashrc
 ###################################
 # 3. Done
 ###################################
-echo "✅ RenderByte banner installed universally"
-echo "🔁 FULL logout (exit SSH) and reconnect"
+echo "✅ All Packages Installed"
+echo "🔁 Restarting SSh Services"
