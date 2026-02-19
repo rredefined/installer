@@ -61,6 +61,9 @@ if (( CPU_PCT >= 85 )); then CPU_CLR="$C_RED"; fi
 
 # Network
 IFACE=$(ip route 2>/dev/null | awk '/default/ {print $5; exit}')
+if [[ -z "$IFACE" ]]; then
+  IFACE=$(ls /sys/class/net 2>/dev/null | grep -E '^(eth|ens|enp|venet)' | head -n1)
+fi
 RX_B=$(cat /sys/class/net/$IFACE/statistics/rx_bytes 2>/dev/null || echo 0)
 TX_B=$(cat /sys/class/net/$IFACE/statistics/tx_bytes 2>/dev/null || echo 0)
 
@@ -87,10 +90,16 @@ case "$VIRT_RAW" in
 esac
 
 # ISP
-ISP=$(curl -m 1.5 -s https://ipinfo.io/org 2>/dev/null || echo "N/A")
+ISP=$(curl -m 1.5 -s https://ipinfo.io/org 2>/dev/null)
+[[ -z "$ISP" ]] && ISP="N/A"
 
-# Banner
+# ✅ FULL RenderByte ASCII Banner
 echo -e "${C_BLUE}██████╗ ${C_CYAN}███████╗${C_BLUE}███╗   ██╗${C_CYAN}██████╗ ${C_BLUE}███████╗${C_CYAN}██████╗ ${C_BLUE}██████╗ ${C_CYAN}██╗   ██╗${C_BLUE}████████╗${C_CYAN}███████╗${C_RESET}"
+echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔════╝${C_BLUE}████╗  ██║${C_CYAN}██╔══██╗${C_BLUE}██╔════╝${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}╚██╗ ██╔╝${C_BLUE}╚══██╔══╝${C_CYAN}██╔════╝${C_RESET}"
+echo -e "${C_BLUE}██████╔╝${C_CYAN}█████╗  ${C_BLUE}██╔██╗ ██║${C_CYAN}██║  ██║${C_BLUE}█████╗  ${C_CYAN}██████╔╝${C_BLUE}██████╔╝${C_CYAN} ╚████╔╝ ${C_BLUE}   ██║   ${C_CYAN}█████╗  ${C_RESET}"
+echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔══╝  ${C_BLUE}██║╚██╗██║${C_CYAN}██║  ██║${C_BLUE}██╔══╝  ${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}  ╚██╔╝  ${C_BLUE}   ██║   ${C_CYAN}██╔══╝  ${C_RESET}"
+echo -e "${C_BLUE}██║  ██║${C_CYAN}███████╗${C_BLUE}██║ ╚████║${C_CYAN}██████╔╝${C_BLUE}███████╗${C_CYAN}██║  ██║${C_BLUE}██████╔╝${C_CYAN}   ██║   ${C_BLUE}   ██║   ${C_CYAN}███████╗${C_RESET}"
+echo -e "${C_BLUE}╚═╝  ╚═╝${C_CYAN}╚══════╝${C_BLUE}╚═╝  ╚═══╝${C_CYAN}╚═════╝ ${C_BLUE}╚══════╝${C_CYAN}╚═╝  ╚═╝${C_BLUE}╚═════╝ ${C_CYAN}   ╚═╝   ${C_BLUE}   ╚═╝   ${C_CYAN}╚══════╝${C_RESET}"
 echo ""
 
 echo -e "${C_WHITE} OS        ${C_GRAY}: ${C_RESET}${OS}"
@@ -98,7 +107,7 @@ echo -e "${C_WHITE} Processor ${C_GRAY}: ${C_RESET}${CPU}"
 echo -e "${C_WHITE} Cores     ${C_GRAY}: ${C_RESET}${CORES}"
 echo -e "${C_WHITE} RAM       ${C_GRAY}: ${C_RESET}${RAM_USED} / ${RAM_TOTAL}"
 echo -e "${C_WHITE} Disk      ${C_GRAY}: ${C_RESET}${DISK_USED} / ${DISK_TOTAL}"
-echo -e "${C_WHITE} IPv4      ${C_GRAY}: ${C_RESET}${IP}"
+echo -e "${C_WHITE} IPv4      ${C_GRAY}: ${C_RESET}${IP:-N/A}"
 echo -e "${C_WHITE} Hostname  ${C_GRAY}: ${C_RESET}${HOST}"
 echo -e "${C_WHITE} Uptime    ${C_GRAY}: ${C_RESET}${UPTIME}"
 echo -e "${C_WHITE} ISP       ${C_GRAY}: ${C_RESET}${ISP}"
@@ -107,7 +116,7 @@ echo ""
 
 echo -e "${C_BOLD}${C_CYAN} Live Stats${C_RESET}"
 echo -e "${C_WHITE} CPU Usage ${C_GRAY}: ${CPU_CLR}${CPU_PCT}%${C_RESET} ${C_GRAY}(Load: ${LOAD})${C_RESET}"
-echo -e "${C_WHITE} Network   ${C_GRAY}: ${C_RESET}${IFACE}  RX:${RX_H}  TX:${TX_H}"
+echo -e "${C_WHITE} Network   ${C_GRAY}: ${C_RESET}${IFACE:-N/A}  RX:${RX_H}  TX:${TX_H}"
 echo ""
 
 echo -e "${C_BOLD}${C_BLUE}🛡 DDoS Protection:${C_RESET} ${C_GREEN}ENABLED${C_RESET}"
@@ -120,10 +129,12 @@ MOTD
 
 chmod +x "$MOTD_FILE"
 
+# disable default motd
 rm -f /etc/motd
 touch /etc/motd
 chmod -x /etc/update-motd.d/* 2>/dev/null || true
 
-echo "✔ Clean RenderByte MOTD installed."
-echo "Reconnect SSH to see it."
+echo "✔ RenderByte MOTD fixed + installed."
+echo "Test now:"
+bash "$MOTD_FILE" || true
 EOF
