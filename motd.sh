@@ -1,12 +1,13 @@
 bash <<'EOF'
 set -e
+
 MOTD_FILE="/etc/profile.d/renderbyte-motd.sh"
 
 cat > "$MOTD_FILE" <<'MOTD'
 #!/bin/bash
 [[ $- != *i* ]] && return
 
-# -------- RenderByte MOTD (Auto-fit Banner) --------
+# -------- RenderByte MOTD (Banner Fix) --------
 
 C_RESET="\e[0m"
 C_BOLD="\e[1m"
@@ -18,9 +19,6 @@ C_GRAY="\e[38;5;245m"
 C_GREEN="\e[38;5;82m"
 C_YELLOW="\e[38;5;226m"
 C_RED="\e[38;5;196m"
-
-# Terminal width
-COLS=$(tput cols 2>/dev/null || echo 120)
 
 clear
 
@@ -89,26 +87,34 @@ case "$VIRT_RAW" in
   *) VPS_TYPE="$VIRT_RAW" ;;
 esac
 
-# ISP (external)
+# ISP
 ISP=$(curl -m 1.5 -s https://ipinfo.io/org 2>/dev/null)
 [[ -z "$ISP" ]] && ISP="N/A"
 
-# ---- Auto-fit Banner ----
-if (( COLS >= 110 )); then
-  # Full banner (6 lines)
-  echo -e "${C_BLUE}██████╗ ${C_CYAN}███████╗${C_BLUE}███╗   ██╗${C_CYAN}██████╗ ${C_BLUE}███████╗${C_CYAN}██████╗ ${C_BLUE}██████╗ ${C_CYAN}██╗   ██╗${C_BLUE}████████╗${C_CYAN}███████╗${C_RESET}"
-  echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔════╝${C_BLUE}████╗  ██║${C_CYAN}██╔══██╗${C_BLUE}██╔════╝${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}╚██╗ ██╔╝${C_BLUE}╚══██╔══╝${C_CYAN}██╔════╝${C_RESET}"
-  echo -e "${C_BLUE}██████╔╝${C_CYAN}█████╗  ${C_BLUE}██╔██╗ ██║${C_CYAN}██║  ██║${C_BLUE}█████╗  ${C_CYAN}██████╔╝${C_BLUE}██████╔╝${C_CYAN} ╚████╔╝ ${C_BLUE}   ██║   ${C_CYAN}█████╗  ${C_RESET}"
-  echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔══╝  ${C_BLUE}██║╚██╗██║${C_CYAN}██║  ██║${C_BLUE}██╔══╝  ${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}  ╚██╔╝  ${C_BLUE}   ██║   ${C_CYAN}██╔══╝  ${C_RESET}"
-  echo -e "${C_BLUE}██║  ██║${C_CYAN}███████╗${C_BLUE}██║ ╚████║${C_CYAN}██████╔╝${C_BLUE}███████╗${C_CYAN}██║  ██║${C_BLUE}██████╔╝${C_CYAN}   ██║   ${C_BLUE}   ██║   ${C_CYAN}███████╗${C_RESET}"
-  echo -e "${C_BLUE}╚═╝  ╚═╝${C_CYAN}╚══════╝${C_BLUE}╚═╝  ╚═══╝${C_CYAN}╚═════╝ ${C_BLUE}╚══════╝${C_CYAN}╚═╝  ╚═╝${C_BLUE}╚═════╝ ${C_CYAN}   ╚═╝   ${C_BLUE}   ╚═╝   ${C_CYAN}╚══════╝${C_RESET}"
-else
-  # Compact banner for small terminals
-  echo -e "${C_BOLD}${C_CYAN}RENDER${C_BLUE}BYTE${C_RESET} ${C_GRAY}- VPS Hosting${C_RESET}"
+# ✅ FULL banner printed via heredoc (most reliable)
+cat <<'BANNER'
+██████╗ ███████╗███╗   ██╗██████╗ ███████╗██████╗ ██████╗ ██╗   ██╗████████╗███████╗
+██╔══██╗██╔════╝████╗  ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝
+██████╔╝█████╗  ██╔██╗ ██║██║  ██║█████╗  ██████╔╝██████╔╝ ╚████╔╝    ██║   █████╗  
+██╔══██╗██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗██╔══██╗  ╚██╔╝     ██║   ██╔══╝  
+██║  ██║███████╗██║ ╚████║██████╔╝███████╗██║  ██║██████╔╝   ██║      ██║   ███████╗
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝      ╚═╝   ╚══════╝
+BANNER
+
+# Colorize banner (apply blue/cyan quickly)
+# (prints banner again colored, then clears the plain one by moving up 6 lines)
+# If your terminal doesn't support cursor movement, it will just show colored one below (still fine).
+if command -v tput >/dev/null 2>&1; then
+  tput cuu 6 2>/dev/null || true
 fi
+echo -e "${C_BLUE}██████╗ ${C_CYAN}███████╗${C_BLUE}███╗   ██╗${C_CYAN}██████╗ ${C_BLUE}███████╗${C_CYAN}██████╗ ${C_BLUE}██████╗ ${C_CYAN}██╗   ██╗${C_BLUE}████████╗${C_CYAN}███████╗${C_RESET}"
+echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔════╝${C_BLUE}████╗  ██║${C_CYAN}██╔══██╗${C_BLUE}██╔════╝${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}╚██╗ ██╔╝${C_BLUE}╚══██╔══╝${C_CYAN}██╔════╝${C_RESET}"
+echo -e "${C_BLUE}██████╔╝${C_CYAN}█████╗  ${C_BLUE}██╔██╗ ██║${C_CYAN}██║  ██║${C_BLUE}█████╗  ${C_CYAN}██████╔╝${C_BLUE}██████╔╝${C_CYAN} ╚████╔╝ ${C_BLUE}   ██║   ${C_CYAN}█████╗  ${C_RESET}"
+echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔══╝  ${C_BLUE}██║╚██╗██║${C_CYAN}██║  ██║${C_BLUE}██╔══╝  ${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}  ╚██╔╝  ${C_BLUE}   ██║   ${C_CYAN}██╔══╝  ${C_RESET}"
+echo -e "${C_BLUE}██║  ██║${C_CYAN}███████╗${C_BLUE}██║ ╚████║${C_CYAN}██████╔╝${C_BLUE}███████╗${C_CYAN}██║  ██║${C_BLUE}██████╔╝${C_CYAN}   ██║   ${C_BLUE}   ██║   ${C_CYAN}███████╗${C_RESET}"
+echo -e "${C_BLUE}╚═╝  ╚═╝${C_CYAN}╚══════╝${C_BLUE}╚═╝  ╚═══╝${C_CYAN}╚═════╝ ${C_BLUE}╚══════╝${C_CYAN}╚═╝  ╚═╝${C_BLUE}╚═════╝ ${C_CYAN}   ╚═╝   ${C_BLUE}   ╚═╝   ${C_CYAN}╚══════╝${C_RESET}"
 echo ""
 
-# Info
 echo -e "${C_WHITE} OS        ${C_GRAY}: ${C_RESET}${OS}"
 echo -e "${C_WHITE} Processor ${C_GRAY}: ${C_RESET}${CPU}"
 echo -e "${C_WHITE} Cores     ${C_GRAY}: ${C_RESET}${CORES}"
@@ -136,12 +142,15 @@ MOTD
 
 chmod +x "$MOTD_FILE"
 
+# Ensure UNIX line endings (just in case)
+sed -i 's/\r$//' "$MOTD_FILE" || true
+
 # Disable default MOTD
 rm -f /etc/motd
 touch /etc/motd
 chmod -x /etc/update-motd.d/* 2>/dev/null || true
 
-echo "✔ RenderByte MOTD updated (auto-fit banner)."
+echo "✔ RenderByte MOTD banner fixed."
 echo "Test:"
 bash "$MOTD_FILE" || true
 EOF
