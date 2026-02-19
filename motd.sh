@@ -1,18 +1,15 @@
 bash <<'EOF'
 set -e
-
 MOTD_FILE="/etc/profile.d/renderbyte-motd.sh"
 
 cat > "$MOTD_FILE" <<'MOTD'
 #!/bin/bash
 [[ $- != *i* ]] && return
 
-# -------- RenderByte MOTD (Clean - No Animation) --------
+# -------- RenderByte MOTD (Auto-fit Banner) --------
 
-# Colors
 C_RESET="\e[0m"
 C_BOLD="\e[1m"
-C_DIM="\e[2m"
 
 C_BLUE="\e[38;5;39m"
 C_CYAN="\e[38;5;51m"
@@ -21,6 +18,9 @@ C_GRAY="\e[38;5;245m"
 C_GREEN="\e[38;5;82m"
 C_YELLOW="\e[38;5;226m"
 C_RED="\e[38;5;196m"
+
+# Terminal width
+COLS=$(tput cols 2>/dev/null || echo 120)
 
 clear
 
@@ -43,11 +43,11 @@ HOST=$(hostname)
 UPTIME=$(uptime -p 2>/dev/null)
 
 # CPU usage
-read -r cpu user nice system idle iowait irq softirq steal guest guest_nice < /proc/stat
+read -r cpu user nice system idle iowait irq softirq steal _ < /proc/stat
 prev_idle=$((idle + iowait))
 prev_total=$((user + nice + system + idle + iowait + irq + softirq + steal))
 sleep 0.2
-read -r cpu user nice system idle iowait irq softirq steal guest guest_nice < /proc/stat
+read -r cpu user nice system idle iowait irq softirq steal _ < /proc/stat
 idle_now=$((idle + iowait))
 total_now=$((user + nice + system + idle + iowait + irq + softirq + steal))
 diff_idle=$((idle_now - prev_idle))
@@ -89,19 +89,26 @@ case "$VIRT_RAW" in
   *) VPS_TYPE="$VIRT_RAW" ;;
 esac
 
-# ISP
+# ISP (external)
 ISP=$(curl -m 1.5 -s https://ipinfo.io/org 2>/dev/null)
 [[ -z "$ISP" ]] && ISP="N/A"
 
-# ✅ FULL RenderByte ASCII Banner
-echo -e "${C_BLUE}██████╗ ${C_CYAN}███████╗${C_BLUE}███╗   ██╗${C_CYAN}██████╗ ${C_BLUE}███████╗${C_CYAN}██████╗ ${C_BLUE}██████╗ ${C_CYAN}██╗   ██╗${C_BLUE}████████╗${C_CYAN}███████╗${C_RESET}"
-echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔════╝${C_BLUE}████╗  ██║${C_CYAN}██╔══██╗${C_BLUE}██╔════╝${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}╚██╗ ██╔╝${C_BLUE}╚══██╔══╝${C_CYAN}██╔════╝${C_RESET}"
-echo -e "${C_BLUE}██████╔╝${C_CYAN}█████╗  ${C_BLUE}██╔██╗ ██║${C_CYAN}██║  ██║${C_BLUE}█████╗  ${C_CYAN}██████╔╝${C_BLUE}██████╔╝${C_CYAN} ╚████╔╝ ${C_BLUE}   ██║   ${C_CYAN}█████╗  ${C_RESET}"
-echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔══╝  ${C_BLUE}██║╚██╗██║${C_CYAN}██║  ██║${C_BLUE}██╔══╝  ${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}  ╚██╔╝  ${C_BLUE}   ██║   ${C_CYAN}██╔══╝  ${C_RESET}"
-echo -e "${C_BLUE}██║  ██║${C_CYAN}███████╗${C_BLUE}██║ ╚████║${C_CYAN}██████╔╝${C_BLUE}███████╗${C_CYAN}██║  ██║${C_BLUE}██████╔╝${C_CYAN}   ██║   ${C_BLUE}   ██║   ${C_CYAN}███████╗${C_RESET}"
-echo -e "${C_BLUE}╚═╝  ╚═╝${C_CYAN}╚══════╝${C_BLUE}╚═╝  ╚═══╝${C_CYAN}╚═════╝ ${C_BLUE}╚══════╝${C_CYAN}╚═╝  ╚═╝${C_BLUE}╚═════╝ ${C_CYAN}   ╚═╝   ${C_BLUE}   ╚═╝   ${C_CYAN}╚══════╝${C_RESET}"
+# ---- Auto-fit Banner ----
+if (( COLS >= 110 )); then
+  # Full banner (6 lines)
+  echo -e "${C_BLUE}██████╗ ${C_CYAN}███████╗${C_BLUE}███╗   ██╗${C_CYAN}██████╗ ${C_BLUE}███████╗${C_CYAN}██████╗ ${C_BLUE}██████╗ ${C_CYAN}██╗   ██╗${C_BLUE}████████╗${C_CYAN}███████╗${C_RESET}"
+  echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔════╝${C_BLUE}████╗  ██║${C_CYAN}██╔══██╗${C_BLUE}██╔════╝${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}╚██╗ ██╔╝${C_BLUE}╚══██╔══╝${C_CYAN}██╔════╝${C_RESET}"
+  echo -e "${C_BLUE}██████╔╝${C_CYAN}█████╗  ${C_BLUE}██╔██╗ ██║${C_CYAN}██║  ██║${C_BLUE}█████╗  ${C_CYAN}██████╔╝${C_BLUE}██████╔╝${C_CYAN} ╚████╔╝ ${C_BLUE}   ██║   ${C_CYAN}█████╗  ${C_RESET}"
+  echo -e "${C_BLUE}██╔══██╗${C_CYAN}██╔══╝  ${C_BLUE}██║╚██╗██║${C_CYAN}██║  ██║${C_BLUE}██╔══╝  ${C_CYAN}██╔══██╗${C_BLUE}██╔══██╗${C_CYAN}  ╚██╔╝  ${C_BLUE}   ██║   ${C_CYAN}██╔══╝  ${C_RESET}"
+  echo -e "${C_BLUE}██║  ██║${C_CYAN}███████╗${C_BLUE}██║ ╚████║${C_CYAN}██████╔╝${C_BLUE}███████╗${C_CYAN}██║  ██║${C_BLUE}██████╔╝${C_CYAN}   ██║   ${C_BLUE}   ██║   ${C_CYAN}███████╗${C_RESET}"
+  echo -e "${C_BLUE}╚═╝  ╚═╝${C_CYAN}╚══════╝${C_BLUE}╚═╝  ╚═══╝${C_CYAN}╚═════╝ ${C_BLUE}╚══════╝${C_CYAN}╚═╝  ╚═╝${C_BLUE}╚═════╝ ${C_CYAN}   ╚═╝   ${C_BLUE}   ╚═╝   ${C_CYAN}╚══════╝${C_RESET}"
+else
+  # Compact banner for small terminals
+  echo -e "${C_BOLD}${C_CYAN}RENDER${C_BLUE}BYTE${C_RESET} ${C_GRAY}- VPS Hosting${C_RESET}"
+fi
 echo ""
 
+# Info
 echo -e "${C_WHITE} OS        ${C_GRAY}: ${C_RESET}${OS}"
 echo -e "${C_WHITE} Processor ${C_GRAY}: ${C_RESET}${CPU}"
 echo -e "${C_WHITE} Cores     ${C_GRAY}: ${C_RESET}${CORES}"
@@ -129,12 +136,12 @@ MOTD
 
 chmod +x "$MOTD_FILE"
 
-# disable default motd
+# Disable default MOTD
 rm -f /etc/motd
 touch /etc/motd
 chmod -x /etc/update-motd.d/* 2>/dev/null || true
 
-echo "✔ RenderByte MOTD fixed + installed."
-echo "Test now:"
+echo "✔ RenderByte MOTD updated (auto-fit banner)."
+echo "Test:"
 bash "$MOTD_FILE" || true
 EOF
