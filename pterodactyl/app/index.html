@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quick Question</title>
+  <style>
+    :root{
+      --bg1:#0b0f1a;
+      --bg2:#111a33;
+      --card:#0f1730cc;
+      --text:#eaf0ff;
+      --muted:#a7b4d6;
+      --btn:#1c2a55;
+      --btn2:#24356b;
+      --ring:#7aa2ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 700px at 20% 20%, #2b3b88 0%, transparent 55%),
+        radial-gradient(900px 650px at 80% 70%, #6a2b88 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      padding:24px;
+    }
+    .card{
+      width:min(520px, 100%);
+      background:var(--card);
+      border:1px solid #ffffff14;
+      border-radius:22px;
+      padding:28px;
+      box-shadow: 0 24px 70px #00000066;
+      backdrop-filter: blur(10px);
+    }
+    h1{
+      margin:0 0 6px 0;
+      font-size: clamp(26px, 4vw, 34px);
+      letter-spacing:.2px;
+    }
+    p{
+      margin:0 0 20px 0;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .buttons{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    button{
+      flex:1;
+      min-width:160px;
+      border:1px solid #ffffff1f;
+      background:linear-gradient(180deg, var(--btn2), var(--btn));
+      color:var(--text);
+      padding:14px 16px;
+      border-radius:14px;
+      font-size:16px;
+      cursor:pointer;
+      transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+      box-shadow: 0 10px 25px #00000033;
+    }
+    button:hover{
+      border-color:#ffffff33;
+      box-shadow: 0 16px 40px #00000055;
+      transform: translateY(-1px);
+    }
+    button:active{ transform: translateY(0px) scale(.99); }
+    button:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 3px #0000, 0 0 0 4px var(--ring);
+    }
+    .footer{
+      margin-top:18px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      color:#8ea0cf;
+      font-size:13px;
+    }
+    .tag{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #ffffff1f;
+      background:#0b1024aa;
+    }
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%);
+      background:#0b1024f2;
+      border:1px solid #ffffff1f;
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:14px;
+      box-shadow:0 18px 50px #00000080;
+      display:none;
+      max-width:min(520px, calc(100% - 24px));
+    }
+    .toast strong{display:block;margin-bottom:2px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Quick question…</h1>
+    <p>Are you Gay? 😄</p>
+
+    <div class="buttons">
+      <button id="yes1" type="button">Yes</button>
+      <button id="yes2" type="button">Yes</button>
+    </div>
+
+    <div class="footer">
+      <span class="tag">Totally serious poll</span>
+      <span class="tag">Website by @Cyclone.tf</span>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">
+    <strong>Gotcha 😄</strong>
+    You picked “Yes”. (Both buttons do the same thing.)
+  </div>
+
+  <script>
+    const toast = document.getElementById("toast");
+    function showToast() {
+      toast.style.display = "block";
+      clearTimeout(window.__t);
+      window.__t = setTimeout(() => toast.style.display = "none", 2200);
+    }
+    document.getElementById("yes1").addEventListener("click", showToast);
+    document.getElementById("yes2").addEventListener("click", showToast);
+  </script>
+</body>
+</html>

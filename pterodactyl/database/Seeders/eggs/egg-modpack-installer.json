@@ -1,0 +1,82 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-01-22T00:00:00+00:00",
+    "name": "Modpack Installer",
+    "author": "obscure404@pterodactyl.io",
+    "description": "Egg for installing modpacks using a custom installer tool. This is a temporary egg used only for installation.",
+    "features": null,
+    "docker_images": {
+        "Alpine": "ghcr.io/pterodactyl/yolks:alpine"
+    },
+    "file_denylist": [],
+    "startup": "echo \"It seems like an error occurred during modpack installation. Please contact the system administrators for help.\"",
+    "config": {
+        "files": "{}",
+        "startup": "{}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/ash\r\nmkdir -p /mnt/server\r\ncd /mnt/server || exit\r\napk add --no-cache --update curl bash\r\n\r\nDOWNLOAD_URL=\"aHR0cHM6Ly9vYnNjdXJlNDA0LmRldi9kb3dubG9hZC9taW5lY3JhZnQtbW9kcGFjay1zZXJ2ZXItaW5zdGFsbGVyLXg4Nl82NA==\"\r\nINSTALLER_NAME=\"minecraft-modpack-server-installer-x86_64\"\r\n\r\nif [ \"$(uname -m)\" = \"arm64\" ] || [ \"$(uname -m)\" = \"aarch64\" ]; then\r\n    DOWNLOAD_URL=\"aHR0cHM6Ly9vYnNjdXJlNDA0LmRldi9kb3dubG9hZC9taW5lY3JhZnQtbW9kcGFjay1zZXJ2ZXItaW5zdGFsbGVyLWFhcmNoNjQ=\"\r\n    INSTALLER_NAME=\"minecraft-modpack-server-installer-aarch64\"\r\nfi\r\n\r\nREAL_URL=$(echo \"$DOWNLOAD_URL\" | base64 -d)\r\ncurl -o /tmp/installer -L \"$REAL_URL\"\r\nchmod +x /tmp/installer\r\n\r\nif [ \"${DELETE_SERVER_FILES}\" == \"1\" ] || [ \"${DELETE_SERVER_FILES}\" == \"true\" ]; then\r\n    rm -rf libraries mods coremods .fabric user_jvm_args.txt server.jar\r\nfi\r\n\r\nmkdir -p /mnt/server/tmp\r\nexport TMPDIR=/mnt/server/tmp\r\n\r\n/tmp/installer -provider \"${MODPACK_PROVIDER}\" -modpack \"${MODPACK_ID}\" -version \"${MODPACK_VERSION_ID}\" -key \"${CURSEFORGE_API_KEY}\" --dir /mnt/server\r\n\r\nrm -rf /mnt/server/tmp\r\nrm /tmp/installer",
+            "container": "eclipse-temurin:21-alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Modpack ID",
+            "description": "A unique identifier for the modpack to install.",
+            "env_variable": "MODPACK_ID",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Modpack Version ID",
+            "description": "A unique identifier for the modpack version to install.",
+            "env_variable": "MODPACK_VERSION_ID",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Modpack Provider",
+            "description": "The modpack provider to use for the installation.",
+            "env_variable": "MODPACK_PROVIDER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "CurseForge API Key",
+            "description": "API Key for CurseForge, if required.",
+            "env_variable": "CURSEFORGE_API_KEY",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Delete Files",
+            "description": "Whether to delete files before install.",
+            "env_variable": "DELETE_SERVER_FILES",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+        }
+    ]
+}
