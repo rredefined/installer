@@ -1,6 +1,8 @@
 #!/bin/bash
-
 set -e
+
+echo "Cloning installer repository..."
+git clone https://github.com/rredefined/installer.git
 
 echo "Moving installer contents to /var/www..."
 mv installer/* /var/www/
